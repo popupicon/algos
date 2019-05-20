@@ -31,9 +31,11 @@ void clear_hash_table(list **table);
 
 int _hash_mod_i(int);
 
+int _hash_fun(int);
+
 data_item get_elem(int);
 
-data_item delete_elem(int);
+int delete_elem(int, list **);
 
 data_item insert_elem(int, list **);
 
@@ -52,6 +54,11 @@ int main(int argc, char **argv)
     insert_elem(10, table);
 
     print_table(table);
+
+    delete_elem(64272, table);
+    delete_elem(10, table);
+
+    print_table(table);
 }
 
 int _hash_mod_i(int num)
@@ -59,9 +66,14 @@ int _hash_mod_i(int num)
     return num % DISTRIBUTION_FACTOR;
 }
 
+int _hash_fun(int num)
+{
+    return _hash_mod_i(num);
+}
+
 data_item insert_elem(int num, list **table)
 {
-    int index = _hash_mod_i(num);
+    int index = _hash_fun(num);
 
     if (table[index] != NULL)
     {
@@ -146,6 +158,51 @@ void print_table(list **table)
                 printf(" ]\n");
             }
         }
+    }
+}
+
+int delete_elem(int num, list **table)
+{
+    int index = _hash_fun(num);
+    if (table[index] != NULL)
+    {
+        if (table[index]->size == 1)
+        {
+            // perhaps memory leak
+            free(table[index]);
+            table[index] = NULL;
+            return 0;
+        }
+        else
+        {
+            node *current = table[index]->data;
+            node *previous = table[index]->data;
+            while (current != NULL)
+            {
+                if (current->data.data == num)
+                {
+                    if (current != previous)
+                    {
+                        previous->next = current->next;
+                    }
+                    else
+                    {
+                        if (table[index]->data == current) {
+                            table[index]->data = current->next;
+                        }
+                    }
+                    free(current);
+                    return 0;
+                }
+                previous = current;
+                current = current->next;
+            }
+        }
+    }
+    else
+    {
+        printf("Error: No such element");
+        return -1;
     }
 }
 
